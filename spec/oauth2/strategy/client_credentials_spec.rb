@@ -78,4 +78,30 @@ describe OAuth2::Strategy::ClientCredentials do
       end
     end
   end
+
+  describe "#basic_auth" do
+    it "returns Authorization header" do
+      expect(subject.basic_auth).to eq({'Authorization' => 'Basic YWJjOmRlZg=='})
+    end
+  end
+
+  describe "#merge_headers" do
+    context "with existing headers" do
+      let(:accept_json) { { 'Accept' => 'application/json' } }
+      let(:existing_headers) { { :headers => accept_json } }
+
+      it "returns existing headers merged with basic_auth hash" do
+        merged_headers = subject.merge_headers(existing_headers)
+        expect(merged_headers[:headers]).to include(accept_json)
+        expect(merged_headers[:headers]).to include(subject.basic_auth)
+      end
+    end
+
+    context "without existing headers" do
+      it "returns headers hash containing basic_auth" do
+        merged_headers = subject.merge_headers({})
+        expect(merged_headers[:headers]).to include(subject.basic_auth)
+      end
+    end
+  end
 end
